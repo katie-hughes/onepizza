@@ -7,72 +7,63 @@ import random
 fname = sys.argv[1]
 AllLikes = []
 AllDislikes = []
-lookup = []
+Preferences = []
 with open(fname) as f:
     for i,line in enumerate(f.readlines()):
         if i == 0:
             total = int(line)
-            print(total, 'total people')
+            print(f"There are {total} possible customers.")
         else:
             spl = line.split()
             n = int(spl[0])
             pid = (i+1)//2 - 1
-            print('person # %s'%pid)
-            if (i%2)==0:
+            if (i%2)!=0:
+                # likes
+                print(f"Person # {pid}")
+                Preferences.append([])
+                likes = []
+                for l in range(n):
+                    item = spl[l+1]
+                    likes.append(item)
+                    AllLikes.append(item)
+                (Preferences[pid]).append(likes)
+                print(f"likes: {likes}")
+            else:
                 # dislikes
                 dislikes = []
                 for d in range(n):
                     item = spl[d+1]
                     dislikes.append(item)
                     AllDislikes.append(item)
-                (lookup[pid]).append(dislikes)
-                print("dislikes:", dislikes, '\n')
-            else:
-                # likes
-                lookup.append([])
-                likes = []
-                for l in range(n):
-                    item = spl[l+1]
-                    likes.append(item)
-                    AllLikes.append(item)
-                (lookup[pid]).append(likes)
-                print("likes:", likes)
+                (Preferences[pid]).append(dislikes)
+                print(f"dislikes: {dislikes}\n")
+
 
 ingredients = list(set(AllLikes+AllDislikes))
 
-#print(len(ingredients), 'ingredients')
+print(f"{len(ingredients)} possible ingredients")
+
+## Preferences[person][0] is likes, Preferences[person][1] is their dislikes
 
 
-
-## lookup[person][0] is likes, lookup[person][1] is their dislikes
-
-
-def determine_score(Preferences, FinalList):
-    res = 0
-    for people in Preferences:
+def determine_score(InputList, SolutionList):
+    customers = 0
+    for people in InputList:
         likes = people[0]
         dislikes = people[1]
-        #print("Likes:", likes)
-        #print("Dislikes:", dislikes)
         eat = True
         for l in likes:
-            if l not in FinalList:
-                #print("%s not in %s"%(l, FinalList))
+            if l not in SolutionList:
                 eat = False
                 break
         if eat:
             for d in dislikes:
-                if d in FinalList:
-                    #print("%s not in %s"%(d, FinalList))
+                if d in SolutionList:
                     eat = False
                     break
         if eat:
-            #print("This person will eat\n")
-            res += 1
-        else:
-            #print("This person will not eat\n")
-            pass
-    return res
+            customers += 1
+    return customers
 
 
 
@@ -87,6 +78,8 @@ issue: this doesn't consider grouping of like/dislike for each person
 
 #"""
 
+print("\n\n1. Trying a Simple Approach\n")
+
 CountLikes = Counter(AllLikes)
 CountDislikes = Counter(AllDislikes)
 
@@ -100,11 +93,11 @@ for i in CountLikes:
     numDislike = CountDislikes[i]
     if numLike > numDislike:
         FinalIngredients.append(i)
-    print('%d likes and %d dislikes %s'%(numLike, numDislike,i))
+    print(f"{numLike} likes and {numDislike} dislikes ingredient {i}")
 
 #print(len(FinalIngredients), FinalIngredients)
-simple_score = determine_score(lookup, FinalIngredients)
-print("SCORE: %d/%d"%(simple_score,total))
+simple_score = determine_score(Preferences, FinalIngredients)
+print(f"\nScore for this approach: {simple_score}/{total}")
 
 
 #"""
@@ -127,27 +120,22 @@ if it is higher move on and if not remove that person's
 
 
 #"""
-print('\nRandom Attempt')
+print('\n\n2.Attempt with Greedy(?) algorithm\n')
 
 scores = []
+iterations = 5
 
-
-for x in range(1):
-
+for x in range(iterations):
     Solution = []
-
     indices = list(range(total))
     random.shuffle(indices)
-    print(indices)
-
-
     last_score = 0
 
     for i in indices:
         score_init = last_score
         Solution_copy = list(Solution)
-        likes = lookup[i][0]
-        dislikes = lookup[i][1]
+        likes = Preferences[i][0]
+        dislikes = Preferences[i][1]
         add = True
         for d in dislikes:
             if d in Solution:
@@ -160,7 +148,7 @@ for x in range(1):
                     new=True
                     Solution_copy.append(l)
             if new:
-                score_final = determine_score(lookup, Solution_copy)
+                score_final = determine_score(Preferences, Solution_copy)
                 print(score_init, score_final)
                 if score_final>score_init:
                     Solution = Solution_copy
@@ -168,12 +156,13 @@ for x in range(1):
                     #print('updating solution to ', Solution)
 
     #print(Solution)
-    score = determine_score(lookup, Solution)
-    print(score, total)
+    score = determine_score(Preferences, Solution)
+    print(f"Score: {score}/{total}")
     scores.append(score)
+    print()
 
-print(scores)
-print("Simple Score for comparison:", simple_score)
+print(f"Range of Scores: {scores}")
+print(f"Simple Score for comparison: {simple_score}")
 #"""
 
 
