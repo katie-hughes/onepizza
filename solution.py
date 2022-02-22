@@ -86,17 +86,17 @@ CountDislikes = Counter(AllDislikes)
 #print("LIKES:",CountLikes)
 #print("DISLIKES:",CountDislikes)
 
-FinalIngredients = []
+SimpleSolution = []
 
 for i in CountLikes:
     numLike = CountLikes[i]
     numDislike = CountDislikes[i]
     if numLike > numDislike:
-        FinalIngredients.append(i)
+        SimpleSolution.append(i)
     print(f"{numLike} likes and {numDislike} dislikes ingredient {i}")
 
-#print(len(FinalIngredients), FinalIngredients)
-simple_score = determine_score(Preferences, FinalIngredients)
+print(SimpleSolution)
+simple_score = determine_score(Preferences, SimpleSolution)
 print(f"\nScore for this approach: {simple_score}/{total}")
 
 
@@ -124,6 +124,8 @@ print('\n\n2.Attempt with Greedy(?) algorithm\n')
 
 scores = []
 iterations = 5
+
+GreedySolutions = []
 
 for x in range(iterations):
     Solution = []
@@ -159,10 +161,34 @@ for x in range(iterations):
     score = determine_score(Preferences, Solution)
     print(f"Score: {score}/{total}")
     scores.append(score)
+    GreedySolutions.append(Solution)
     print()
 
 print(f"Range of Scores: {scores}")
 print(f"Simple Score for comparison: {simple_score}")
+
+
+FinalSolution = []
+max_greedy_score = max(scores)
+if max_greedy_score > simple_score:
+    print("Greedy Approach was better")
+    max_greedy_index = scores.index(max_greedy_score)
+    max_greedy_solution = GreedySolutions[max_greedy_index]
+    FinalSolution = max_greedy_solution
+else:
+    print("Simple Approach was better")
+    FinalSolution = SimpleSolution
+
+
+print('\n\nSOLUTION\n\n')
+print(len(FinalSolution),end=' ')
+for i in FinalSolution:
+    print(i, end=' ')
+print()
+
+
+
+
 #"""
 
 
